@@ -2976,7 +2976,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Grammar prompt constructed successfully\n");
-    printf("Sending request to OpenAI API...\n");
+    printf("Sending request to LLM API...\n");
     
     char *grammar_response = chat_with_llm(grammar_prompt, 3, 0.5);
     free(grammar_prompt);
@@ -3003,7 +3003,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("State machine prompt constructed successfully\n");
-    printf("Sending request to OpenAI API...\n");
+    printf("Sending request to LLM API...\n");
     
     char *fsm_response = chat_with_llm(fsm_prompt, 3, 0.5);
     free(fsm_prompt);
@@ -3081,7 +3081,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Grammar prompt constructed successfully\n");
-    printf("Sending request to OpenAI API...\n");
+    printf("Sending request to LLM API...\n");
     
     char *grammar_response = chat_with_llm(grammar_prompt, 3, 0.5);
     free(grammar_prompt);
@@ -3108,7 +3108,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("State machine prompt constructed successfully\n");
-    printf("Sending request to OpenAI API...\n");
+    printf("Sending request to LLM API...\n");
     
     char *fsm_response = chat_with_llm(fsm_prompt, 3, 0.5);
     free(fsm_prompt);
@@ -3370,9 +3370,9 @@ int main(int argc, char *argv[]) {
     printf("=========================================================\n\n");
 
     // Check if OPENAI_API_KEY is set
-    const char* api_key = getenv("OPENAI_API_KEY");
+    const char* api_key = getenv("LLM_API_KEY");
     if (!api_key) {
-        fprintf(stderr, "Error: OPENAI_API_KEY environment variable is not set!\n");
+        fprintf(stderr, "Error: LLM_API_KEY environment variable is not set!\n");
         return 1;
     }
 
