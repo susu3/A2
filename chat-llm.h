@@ -100,8 +100,8 @@ typedef struct {
 // Function declarations
 char *chat_with_llm(char *prompt, int tries, float temperature);
 //char *construct_prompt_for_seeds(char *protocol_name, char **final_msg, char *seedfile_path, char *rfc_path);
-char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, const char *seedfile_path, char *rfc_path, char *protocol_parse_path);
-char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg, char *rfc_path, char *protocol_parse_path);
+char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, const char *seedfile_path, char *rfc_path);
+char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg, char *rfc_path);
 char **extract_sequences(const char *llm_output, int *num_sequences);
 char **extract_messages(const char *llm_output, int *num_messages);
 void write_sequences_to_seeds(const char *seedfile_path, char **sequences, int num_sequences);

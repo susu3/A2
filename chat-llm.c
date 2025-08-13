@@ -516,8 +516,7 @@ char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg,
         "=== BEGIN SPEC ===\\n"
         "%s\\n"
         "=== END SPEC ===\\n\"}]", 
-        protocol_name, rfc_file_content);
-    ) {
+        protocol_name, rfc_file_content) == -1) {
         FATAL("Failed to construct seeds sequence prompt");
         goto cleanup;
     }
@@ -578,6 +577,8 @@ char** extract_messages(const char* sequences_answer, int* num_messages) {
             PFATAL("Failed to allocate memory for combined message");
         }
         combined_message[0] = '\0';
+        size_t combined_len = 0;
+        size_t combined_capacity = seq_len * 2;
         
         // Extract and concatenate all messages in this sequence
         while ((msg_pos = strstr(msg_pos, message_start)) != NULL) {
@@ -617,8 +618,14 @@ char** extract_messages(const char* sequences_answer, int* num_messages) {
             clean_message[clean_idx] = '\0';
             
             if (valid && clean_idx > 0) {
-                // Append to combined message
-                strcat(combined_message, clean_message);
+                // Append to combined message with bounds checking
+                size_t clean_msg_len = strlen(clean_message);
+                if (combined_len + clean_msg_len < combined_capacity) {
+                    strcpy(combined_message + combined_len, clean_message);
+                    combined_len += clean_msg_len;
+                } else {
+                    WARNF("Combined message would exceed buffer capacity, truncating");
+                }
             }
             
             free(message_content);
@@ -642,14 +649,19 @@ char** extract_messages(const char* sequences_answer, int* num_messages) {
                     
                     // Add to messages array
                     (*num_messages)++;
-                    messages = realloc(messages, *num_messages * sizeof(char*));
-                    message_lengths = realloc(message_lengths, *num_messages * sizeof(size_t));
-                    if (!messages || !message_lengths) {
+                    char** temp_messages = realloc(messages, *num_messages * sizeof(char*));
+                    size_t* temp_lengths = realloc(message_lengths, *num_messages * sizeof(size_t));
+                    if (!temp_messages || !temp_lengths) {
+                        // Cleanup on failure
+                        if (temp_messages) messages = temp_messages;
+                        if (temp_lengths) message_lengths = temp_lengths;
                         free(binary_message);
                         free(sequence_content);
                         free(combined_message);
                         PFATAL("Failed to reallocate messages array or lengths array");
                     }
+                    messages = temp_messages;
+                    message_lengths = temp_lengths;
                     messages[*num_messages - 1] = binary_message;
                     message_lengths[*num_messages - 1] = binary_len;  // Store the actual binary length
                     current_messages_count = *num_messages;
@@ -3191,7 +3203,7 @@ void enrich_initial_seeds(void) {
     }
 
     printf("Step 1: Generating the initial seed of message granularity...\n");
-    char *seeds_prompt = construct_prompt_for_seeds_message(protocol_name, &seed_question, seedfile_path, rfc_path, parse_result_path);
+    char *seeds_prompt = construct_prompt_for_seeds_message(protocol_name, &seed_question, seedfile_path, rfc_path);
     if (seeds_prompt == NULL) {
         printf("Failed to retrieve seeds prompt\n");
         FATAL("Failed to retrieve seeds prompt");
@@ -3248,7 +3260,7 @@ void enrich_initial_seeds(void) {
 
     // 2. Generate the initial seed of sequence granularity
     printf("\nStep 2: Generating the initial seed of sequence granularity...\n");
-    char *sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question, rfc_path, parse_result_path);
+    char *sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question, rfc_path);
     if (sequences_prompt == NULL) {
         printf("Failed to retrieve sequences prompt\n");
         FATAL("Failed to retrieve sequences prompt");
