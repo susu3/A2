@@ -62,7 +62,7 @@ def process_markdown(markdown_path, openai_api_key):
     return is_protocol_related
 
 if __name__ == "__main__":
-    openai_api_key = "PLACEHOLDER_API_KEY"
+    openai_api_key = "XX"
     markdown_path = "dnp-2.md"
     
     try:
