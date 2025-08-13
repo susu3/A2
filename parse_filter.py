@@ -62,7 +62,10 @@ def process_markdown(markdown_path, openai_api_key):
     return is_protocol_related
 
 if __name__ == "__main__":
-    openai_api_key = "XX"
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if not openai_api_key:
+        print("Error: OPENAI_API_KEY environment variable not set")
+        exit(1)
     markdown_path = "dnp-2.md"
     
     try:
