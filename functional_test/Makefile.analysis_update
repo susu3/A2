@@ -1,0 +1,55 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -DTEST_PROTOCOL_ANALYSIS_AND_UPDATE
+LDFLAGS = -lcurl -ljson-c -lpcre2-8
+
+# Source file is in the parent directory
+SOURCE = ../chat-llm.c
+
+all: protocol-analyzer-update
+
+protocol-analyzer-update: $(SOURCE)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+clean:
+	rm -f protocol-analyzer-update
+
+.PHONY: all clean
+
+# Test targets for different protocols
+test-modbus: protocol-analyzer-update
+	@echo "Running protocol analysis and update test for MODBUS..."
+	@mkdir -p modbus_output
+	./protocol-analyzer-update MODBUS ../sample_specs/Markdown/modbus.md modbus_output
+	@echo "Check modbus_output directory for generated and updated files."
+
+test-iec104: protocol-analyzer-update
+	@echo "Running protocol analysis and update test for IEC104..."
+	@mkdir -p iec104_output
+	./protocol-analyzer-update IEC104 ../sample_specs/Markdown/IEC104.md iec104_output
+	@echo "Check iec104_output directory for generated and updated files."
+
+test-slmp: protocol-analyzer-update
+	@echo "Running protocol analysis and update test for SLMP..."
+	@mkdir -p slmp_output
+	./protocol-analyzer-update SLMP ../sample_specs/Markdown/slmp.md slmp_output
+	@echo "Check slmp_output directory for generated and updated files."
+
+test-ethernetip: protocol-analyzer-update
+	@echo "Running protocol analysis and update test for EthernetIP..."
+	@mkdir -p ethernetip_output
+	./protocol-analyzer-update EthernetIP ../sample_specs/Markdown/ethernetip.md ethernetip_output
+	@echo "Check ethernetip_output directory for generated and updated files."
+
+# Run all tests
+test-all: test-modbus test-iec104 test-slmp test-ethernetip
+	@echo "All protocol analysis and update tests completed!"
+
+# Default test (MODBUS)
+test: test-modbus
+
+# Clean all output directories
+clean-output:
+	rm -rf modbus_output iec104_output slmp_output ethernetip_output
+
+# Full clean (binary + output)
+clean-all: clean clean-output 

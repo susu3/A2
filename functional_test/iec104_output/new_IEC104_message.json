@@ -1,0 +1,138 @@
+{
+  "protocol": "IEC 104",
+  "endian": "big",
+  "messages": [
+    {
+      "message_name": "I-Frame",
+      "fields": [
+        {
+          "field_name": "StartByte",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": "0x68"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "uint8",
+          "field_length": 1,
+          "dependency": true
+        },
+        {
+          "field_name": "ControlField1",
+          "field_type": "uint8",
+          "field_length": 1,
+          "bit_mask": "0xFE"
+        },
+        {
+          "field_name": "ControlField2",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ControlField3",
+          "field_type": "uint8",
+          "field_length": 1,
+          "bit_mask": "0xFE"
+        },
+        {
+          "field_name": "ControlField4",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ASDU",
+          "field_type": "byte[]",
+          "field_length": "variable",
+          "constraints": [
+            "Must include fields like TypeID, Cause of Transmission, Information Object Address"
+          ]
+        }
+      ]
+    },
+    {
+      "message_name": "U-Frame",
+      "fields": [
+        {
+          "field_name": "StartByte",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": "0x68"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "uint8",
+          "field_length": 1,
+          "dependency": true
+        },
+        {
+          "field_name": "ControlField1",
+          "field_type": "uint8",
+          "field_length": 1,
+          "bit_mask": "0xFF"
+        },
+        {
+          "field_name": "ControlField2",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ControlField3",
+          "field_type": "uint8",
+          "field_length": 1,
+          "bit_mask": "0xFF"
+        },
+        {
+          "field_name": "ControlField4",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ASDU",
+          "field_type": "byte[]",
+          "field_length": "variable",
+          "constraints": [
+            "Must include fields like TypeID, Cause of Transmission, Information Object Address"
+          ]
+        }
+      ]
+    },
+    {
+      "message_name": "S-Frame",
+      "fields": [
+        {
+          "field_name": "StartByte",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": "0x68"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "uint8",
+          "field_length": 1,
+          "dependency": true
+        },
+        {
+          "field_name": "ControlField1",
+          "field_type": "uint8",
+          "field_length": 1,
+          "bit_mask": "0x01"
+        },
+        {
+          "field_name": "ControlField2",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ControlField3",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "ControlField4",
+          "field_type": "uint8",
+          "field_length": 1
+        }
+      ]
+    }
+  ]
+}

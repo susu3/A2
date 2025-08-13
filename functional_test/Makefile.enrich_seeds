@@ -1,0 +1,130 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -DTEST_ENRICH_INITIAL_SEEDS
+LDFLAGS = -lcurl -ljson-c -lpcre2-8
+
+# Source file is in the parent directory
+SOURCE = ../chat-llm.c
+
+all: enrich-seeds-test
+
+enrich-seeds-test: $(SOURCE)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+clean:
+	rm -f enrich-seeds-test
+	rm -rf test_seeds test-parse-result
+	rm -rf modbus_seeds modbus-parse-result
+	rm -rf iec104_seeds iec104-parse-result
+	rm -rf ethernetip_seeds ethernetip-parse-result
+	rm -rf slmp_seeds slmp-parse-result
+	rm -rf debug_seeds debug-parse-result
+	rm -f *.md
+
+.PHONY: all clean setup-env
+
+# Environment setup
+setup-env:
+	@echo "Setting up test environment..."
+	@if [ -z "$$OPENAI_API_KEY" ]; then \
+		echo "ERROR: OPENAI_API_KEY environment variable is not set!"; \
+		echo "Please set your OpenAI API key:"; \
+		echo "export OPENAI_API_KEY=\"your-api-key-here\""; \
+		exit 1; \
+	fi
+	@echo "✓ OPENAI_API_KEY is set"
+
+# Test targets for different protocols
+
+test-modbus: enrich-seeds-test setup-env
+	@echo "Running initial seeds enrichment test for MODBUS..."
+	@mkdir -p modbus_seeds
+	@cp ../sample_specs/Markdown/modbus.md ./modbus_spec.md
+	./enrich-seeds-test MODBUS modbus_seeds modbus_spec.md modbus-parse-result
+	@echo "✓ Test completed. Check modbus_seeds directory for generated seed files."
+	@echo "Generated files:"
+	@ls -la modbus_seeds/ 2>/dev/null || echo "No files generated"
+
+test-iec104: enrich-seeds-test setup-env
+	@echo "Running initial seeds enrichment test for IEC104..."
+	@mkdir -p iec104_seeds
+	@cp ../sample_specs/Markdown/IEC104.md ./iec104_spec.md
+	./enrich-seeds-test IEC104 iec104_seeds iec104_spec.md iec104-parse-result
+	@echo "✓ Test completed. Check iec104_seeds directory for generated seed files."
+	@echo "Generated files:"
+	@ls -la iec104_seeds/ 2>/dev/null || echo "No files generated"
+
+test-ethernetip: enrich-seeds-test setup-env
+	@echo "Running initial seeds enrichment test for EtherNet/IP..."
+	@mkdir -p ethernetip_seeds
+	@cp ../sample_specs/Markdown/ethernetip.md ./ethernetip_spec.md
+	./enrich-seeds-test EthernetIP ethernetip_seeds ethernetip_spec.md ethernetip-parse-result
+	@echo "✓ Test completed. Check ethernetip_seeds directory for generated seed files."
+	@echo "Generated files:"
+	@ls -la ethernetip_seeds/ 2>/dev/null || echo "No files generated"
+
+test-slmp: enrich-seeds-test setup-env
+	@echo "Running initial seeds enrichment test for SLMP..."
+	@mkdir -p slmp_seeds
+	@cp ../sample_specs/Markdown/slmp.md ./slmp_spec.md
+	./enrich-seeds-test SLMP slmp_seeds slmp_spec.md slmp-parse-result
+	@echo "✓ Test completed. Check slmp_seeds directory for generated seed files."
+	@echo "Generated files:"
+	@ls -la slmp_seeds/ 2>/dev/null || echo "No files generated"
+
+# Run all protocol tests
+test-all: test-modbus test-iec104 test-ethernetip test-slmp
+	@echo ""
+	@echo "=========================================="
+	@echo "All protocol tests completed!"
+	@echo "=========================================="
+	@echo "Summary of generated directories:"
+	@for dir in modbus_seeds iec104_seeds ethernetip_seeds slmp_seeds; do \
+		if [ -d "$$dir" ]; then \
+			echo "✓ $$dir ($(shell ls $$dir 2>/dev/null | wc -l) files)"; \
+		else \
+			echo "✗ $$dir (not found)"; \
+		fi \
+	done
+
+# Quick test with minimal setup
+test-quick: enrich-seeds-test setup-env
+	@echo "Running quick test with MODBUS protocol..."
+	@mkdir -p test_seeds
+	@cp ../sample_specs/Markdown/modbus.md ./test_spec.md
+	./enrich-seeds-test MODBUS test_seeds test_spec.md test-parse-result
+	@echo "✓ Quick test completed. Check test_seeds directory for results."
+
+# Debug mode with verbose output
+debug-test: CFLAGS += -g -DDEBUG
+debug-test: enrich-seeds-test setup-env
+	@echo "Running debug test for MODBUS..."
+	@mkdir -p debug_seeds
+	@cp ../sample_specs/Markdown/modbus.md ./debug_spec.md
+	./enrich-seeds-test MODBUS debug_seeds debug_spec.md debug-parse-result
+	@echo "✓ Debug test completed."
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all          - Build the enrich-seeds-test executable"
+	@echo "  test-modbus  - Test MODBUS protocol seed enrichment"
+	@echo "  test-iec104  - Test IEC104 protocol seed enrichment"
+	@echo "  test-ethernetip - Test EtherNet/IP protocol seed enrichment"
+	@echo "  test-slmp    - Test SLMP protocol seed enrichment"
+	@echo "  test-all     - Run all protocol tests"
+	@echo "  test-quick   - Quick test with MODBUS"
+	@echo "  debug-test   - Debug mode test"
+	@echo "  setup-env    - Check environment setup"
+	@echo "  clean        - Clean all generated files"
+	@echo "  help         - Show this help message"
+	@echo ""
+	@echo "Prerequisites:"
+	@echo "  - Set OPENAI_API_KEY environment variable"
+	@echo "  - Install required libraries: libcurl-dev libjson-c-dev libpcre2-dev"
+	@echo ""
+	@echo "Example usage:"
+	@echo "  export OPENAI_API_KEY=\"your-api-key\""
+	@echo "  make -f Makefile.enrich_seeds test-modbus"
+	@echo ""
+	@echo "Note: Seeds are generated directly in the seed directory (e.g., modbus_seeds/)"
+	@echo "      Parse results are stored in parse result directory (e.g., modbus-parse-result/)" 

@@ -1,0 +1,72 @@
+# Makefile for RFC Consistency Analysis Testing
+# Usage: make -f Makefile.rfc-consistency [target]
+
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -DTEST_RFC_CONSISTENCY
+LDFLAGS = -lcurl -ljson-c
+
+# Source files
+SOURCES = ../chat-llm.c ../alloc-inl.h ../hash.h
+INCLUDES = -I.. -I../
+
+# Test executable
+TEST_EXEC = test-rfc-consistency
+
+# Default target
+all: $(TEST_EXEC)
+
+# Build test executable
+$(TEST_EXEC): $(SOURCES)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(TEST_EXEC) ../chat-llm.c $(LDFLAGS)
+
+# Run basic functionality test
+test-basic: $(TEST_EXEC)
+	@echo "=== Running Basic RFC Consistency Test ==="
+	./$(TEST_EXEC) ./test_output_basic
+
+# Run test with sample RFC file
+test-with-rfc: $(TEST_EXEC)
+	@echo "=== Running RFC Consistency Test with Sample RFC ==="
+	@echo "Creating sample RFC file..."
+	@echo "# Sample MODBUS Protocol Specification" > sample_rfc.md
+	@echo "" >> sample_rfc.md
+	@echo "## Overview" >> sample_rfc.md
+	@echo "MODBUS is a communication protocol developed by Modicon in 1979." >> sample_rfc.md
+	@echo "" >> sample_rfc.md
+	@echo "## Function Codes" >> sample_rfc.md
+	@echo "- 0x01: Read Coils" >> sample_rfc.md
+	@echo "- 0x02: Read Discrete Inputs" >> sample_rfc.md
+	@echo "- 0x03: Read Holding Registers" >> sample_rfc.md
+	@echo "- 0x04: Read Input Registers" >> sample_rfc.md
+	@echo "- 0x05: Write Single Coil" >> sample_rfc.md
+	@echo "- 0x06: Write Single Register" >> sample_rfc.md
+	@echo "" >> sample_rfc.md
+	@echo "## Message Format" >> sample_rfc.md
+	@echo "All MODBUS messages follow the format: [Device ID][Function Code][Data][CRC]" >> sample_rfc.md
+	./$(TEST_EXEC) ./test_output_with_rfc ./sample_rfc.md
+
+# Run comprehensive test
+test-comprehensive: test-basic test-with-rfc
+	@echo "=== All RFC Consistency Tests Completed ==="
+
+# Clean up generated files
+clean:
+	rm -f $(TEST_EXEC)
+	rm -f sample_rfc.md
+	rm -rf test_output_basic test_output_with_rfc
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all               - Build test executable"
+	@echo "  test-basic        - Run basic functionality test"
+	@echo "  test-with-rfc     - Run test with sample RFC file"
+	@echo "  test-comprehensive- Run all tests"
+	@echo "  clean             - Clean up generated files"
+	@echo "  help              - Show this help message"
+	@echo ""
+	@echo "Usage Examples:"
+	@echo "  make -f Makefile.rfc-consistency test-basic"
+	@echo "  make -f Makefile.rfc-consistency test-comprehensive"
+
+.PHONY: all test-basic test-with-rfc test-comprehensive clean help 

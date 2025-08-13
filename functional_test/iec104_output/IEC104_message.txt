@@ -1,0 +1,8 @@
+```
+
+### TXT Explanation:
+- **Length Field Dependency**: The value of the "Length" field is determined by the sum of the lengths of all fields following it, specifically the length of the "ASDU" plus 4 bytes for the control fields.
+- **ControlField1 in U-Frame**: Only one of the first six bits of the "ControlField1" in the U-Frame can be set to 1, which is used to specify different control functions like STARTDT, STOPDT, and TESTFR.
+- **ASDU Structure**: The ASDU structure is variable and depends on the type of data being transmitted. It includes fields like TypeID, Cause of Transmission, and Information Object Address, among others, which are defined in the IEC 104 standard.
+
+This JSON representation captures the structure and dependencies of the IEC 104 request messages, focusing on the I-Frame and U-Frame formats, which are essential for protocol fuzz testing.

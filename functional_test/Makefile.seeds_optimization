@@ -1,0 +1,193 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -DTEST_INITIAL_SEEDS_OPTIMIZATION
+LDFLAGS = -lcurl -ljson-c -lpcre2-8
+
+# Source file is in the parent directory
+SOURCE = ../chat-llm.c
+
+all: seeds-optimization-test
+
+seeds-optimization-test: $(SOURCE)
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+clean:
+	rm -f seeds-optimization-test
+	rm -rf test_seeds test_seeds_backup test_seeds_optimized
+	rm -rf modbus_seeds modbus_seeds_backup modbus_seeds_optimized
+	rm -rf iec104_seeds iec104_seeds_backup iec104_seeds_optimized
+	rm -rf ethernetip_seeds ethernetip_seeds_backup ethernetip_seeds_optimized
+	rm -rf slmp_seeds slmp_seeds_backup slmp_seeds_optimized
+
+.PHONY: all clean setup-env
+
+# Environment setup
+setup-env:
+	@echo "Setting up test environment..."
+	@echo "Checking for afl-cmin availability..."
+	@which afl-cmin > /dev/null 2>&1 || (echo "Error: afl-cmin not found in PATH" && echo "Please install AFL or ensure afl-cmin is available" && exit 1)
+	@echo "✓ afl-cmin found and ready"
+
+# Test targets
+
+test-basic: seeds-optimization-test setup-env
+	@echo "Running basic seed optimization test..."
+	@mkdir -p test_seeds
+	./seeds-optimization-test test_seeds "/bin/cat @@"
+	@echo "✓ Basic test completed. Check test_seeds directory for results."
+
+test-with-target: seeds-optimization-test setup-env
+	@echo "Running seed optimization test with custom parameters..."
+	@mkdir -p test_seeds
+	./seeds-optimization-test test_seeds "/bin/cat @@" 100 2000 0
+	@echo "✓ Test with target completed. Check test_seeds directory for results."
+
+test-modbus: seeds-optimization-test setup-env
+	@echo "Running MODBUS seed optimization test..."
+	@mkdir -p modbus_seeds
+	# Create test seeds that simulate MODBUS protocol
+	@for i in $$(seq 1 15); do \
+		echo -ne '\\x00\\x01\\x00\\x00\\x00\\x06\\xFF\\x03\\x00\\x00\\x00' > modbus_seeds/modbus_$$i.bin; \
+		printf '%02x' $$i >> modbus_seeds/modbus_$$i.bin; \
+	done
+	./seeds-optimization-test modbus_seeds "/bin/cat @@" 50 1500 0
+	@echo "✓ MODBUS test completed. Check modbus_seeds directory for optimized seeds."
+
+test-iec104: seeds-optimization-test setup-env
+	@echo "Running IEC104 seed optimization test..."
+	@mkdir -p iec104_seeds
+	# Create test seeds that simulate IEC104 protocol
+	@for i in $$(seq 1 12); do \
+		echo -ne '\\x68\\x04\\x07\\x00\\x00\\x00' > iec104_seeds/iec104_$$i.bin; \
+		printf '%02x' $$i >> iec104_seeds/iec104_$$i.bin; \
+	done
+	./seeds-optimization-test iec104_seeds "/bin/cat @@" 50 1500 0
+	@echo "✓ IEC104 test completed. Check iec104_seeds directory for optimized seeds."
+
+test-ethernetip: seeds-optimization-test setup-env
+	@echo "Running EtherNet/IP seed optimization test..."
+	@mkdir -p ethernetip_seeds
+	# Create test seeds that simulate EtherNet/IP protocol  
+	@for i in $$(seq 1 18); do \
+		echo -ne '\\x6F\\x00\\x04\\x00' > ethernetip_seeds/ethernetip_$$i.bin; \
+		printf '%02x' $$i >> ethernetip_seeds/ethernetip_$$i.bin; \
+		echo -ne '\\x00\\x00\\x00' >> ethernetip_seeds/ethernetip_$$i.bin; \
+	done
+	./seeds-optimization-test ethernetip_seeds "/bin/cat @@" 50 1500 0
+	@echo "✓ EtherNet/IP test completed. Check ethernetip_seeds directory for optimized seeds."
+
+test-slmp: seeds-optimization-test setup-env
+	@echo "Running SLMP seed optimization test..."
+	@mkdir -p slmp_seeds
+	# Create test seeds that simulate SLMP protocol
+	@for i in $$(seq 1 20); do \
+		echo -ne '\\x50\\x00\\x00\\xFF\\xFF\\x03\\x00' > slmp_seeds/slmp_$$i.bin; \
+		printf '%02x' $$i >> slmp_seeds/slmp_$$i.bin; \
+		echo -ne '\\x00\\x00\\x00\\x00' >> slmp_seeds/slmp_$$i.bin; \
+	done
+	./seeds-optimization-test slmp_seeds "/bin/cat @@" 50 1500 0
+	@echo "✓ SLMP test completed. Check slmp_seeds directory for optimized seeds."
+
+# Run all protocol tests
+test-all: test-modbus test-iec104 test-ethernetip test-slmp
+	@echo ""
+	@echo "=========================================="
+	@echo "All protocol optimization tests completed!"
+	@echo "=========================================="
+	@echo "Summary of optimized directories:"
+	@for dir in modbus_seeds iec104_seeds ethernetip_seeds slmp_seeds; do \
+		if [ -d "$$dir" ]; then \
+			echo "✓ $$dir ($(shell ls $$dir 2>/dev/null | wc -l) files)"; \
+		else \
+			echo "✗ $$dir (not found)"; \
+		fi \
+	done
+
+# Performance test with many seeds
+test-performance: seeds-optimization-test setup-env
+	@echo "Running performance test with 50 seeds..."
+	@mkdir -p perf_seeds
+	@for i in $$(seq 1 50); do \
+		echo -ne '\\x68\\x04\\x07\\x00\\x00\\x00' > perf_seeds/seed_$$i.bin; \
+		printf '%04x' $$i >> perf_seeds/seed_$$i.bin; \
+		echo -ne '\\x00\\x00\\x00' >> perf_seeds/seed_$$i.bin; \
+	done
+	@echo "Created 50 test seeds"
+	time ./seeds-optimization-test perf_seeds "/bin/cat @@" 100 1000 0
+	@echo "✓ Performance test completed."
+
+# Debug mode test
+debug-test: CFLAGS += -g -DDEBUG
+debug-test: seeds-optimization-test setup-env
+	@echo "Running debug mode test..."
+	@mkdir -p debug_seeds
+	./seeds-optimization-test debug_seeds "/bin/cat @@" 50 2000 0
+	@echo "✓ Debug test completed."
+
+# Test with different optimization ratios
+test-ratios: seeds-optimization-test setup-env
+	@echo "Testing different seed count scenarios..."
+	@echo "=== Testing with 5 seeds ==="
+	@rm -rf ratio_test_5 && mkdir ratio_test_5
+	@for i in $$(seq 1 5); do echo "test_data_$$i" > ratio_test_5/seed_$$i.bin; done
+	./seeds-optimization-test ratio_test_5 "/bin/cat @@"
+	@echo ""
+	@echo "=== Testing with 1 seed (should skip) ==="
+	@rm -rf ratio_test_1 && mkdir ratio_test_1
+	@echo "single_seed" > ratio_test_1/seed_1.bin
+	./seeds-optimization-test ratio_test_1 "/bin/cat @@"
+	@echo ""
+	@echo "=== Testing with empty directory (should skip) ==="
+	@rm -rf ratio_test_0 && mkdir ratio_test_0
+	./seeds-optimization-test ratio_test_0 "/bin/cat @@"
+	@echo "✓ Ratio tests completed."
+
+# Integration test with real afl-cmin execution
+test-integration: seeds-optimization-test setup-env
+	@echo "Running integration test with real afl-cmin execution..."
+	@mkdir -p integration_seeds
+	# Create diverse test seeds to simulate real fuzzing scenario
+	@echo -ne '\\x68\\x04\\x00\\x00\\x00\\x00' > integration_seeds/minimal.bin
+	@echo -ne '\\x68\\x04\\x07\\x00\\x00\\x00\\x01\\x02\\x03' > integration_seeds/normal.bin
+	@echo -ne '\\x68\\x10\\x43\\x00\\x00\\x00' > integration_seeds/large_header.bin && \
+	 for i in $$(seq 1 20); do printf '\\x%02x' $$i >> integration_seeds/large_header.bin; done
+	@echo -ne '\\xFF\\xFF\\xFF\\xFF' > integration_seeds/invalid.bin
+	@echo -ne '\\x68\\x04\\x13\\x00\\x00\\x00\\x64\\x65\\x66\\x67' > integration_seeds/with_data.bin
+	@echo "Created 5 diverse test seeds for integration test"
+	./seeds-optimization-test integration_seeds "/bin/cat @@" 100 3000 0
+	@echo "✓ Integration test completed."
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all              - Build the seeds-optimization-test executable"
+	@echo "  test-basic       - Basic seed optimization test with /bin/cat"
+	@echo "  test-with-target - Test with custom parameters"
+	@echo "  test-modbus      - Test MODBUS protocol seed optimization"
+	@echo "  test-iec104      - Test IEC104 protocol seed optimization"
+	@echo "  test-ethernetip  - Test EtherNet/IP protocol seed optimization"
+	@echo "  test-slmp        - Test SLMP protocol seed optimization"
+	@echo "  test-all         - Run all protocol tests"
+	@echo "  test-performance - Performance test with 50 seeds"
+	@echo "  test-ratios      - Test different seed count scenarios"
+	@echo "  test-integration - Integration test with diverse seeds"
+	@echo "  debug-test       - Debug mode test"
+	@echo "  setup-env        - Check environment setup (afl-cmin availability)"
+	@echo "  clean            - Clean all generated files"
+	@echo "  help             - Show this help message"
+	@echo ""
+	@echo "Prerequisites:"
+	@echo "  - GCC compiler"
+	@echo "  - Required libraries: libcurl-dev libjson-c-dev libpcre2-dev"
+	@echo "  - afl-cmin utility in PATH (part of AFL installation)"
+	@echo ""
+	@echo "Example usage:"
+	@echo "  make -f Makefile.seeds_optimization setup-env  # Check prerequisites"
+	@echo "  make -f Makefile.seeds_optimization test-basic"
+	@echo "  make -f Makefile.seeds_optimization test-all"
+	@echo ""
+	@echo "Manual usage:"
+	@echo "  ./seeds-optimization-test <seed_dir> <target_binary> [mem_limit] [timeout] [qemu_mode]"
+	@echo "  ./seeds-optimization-test ./my_seeds '/bin/cat @@' 100 2000 0"
+	@echo ""
+	@echo "Note: This test executes real afl-cmin for seed corpus minimization."
+	@echo "      afl-cmin analyzes code coverage to remove redundant seeds." 

@@ -1,0 +1,37 @@
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> SESSION_REGISTERING : RegisterSession
+    SESSION_REGISTERING --> SESSION_ACTIVE : Session registered
+    SESSION_ACTIVE --> SESSION_TERMINATING : UnRegisterSession
+    SESSION_ACTIVE --> SESSION_ACTIVE : SendRRData
+    SESSION_ACTIVE --> SESSION_ACTIVE : SendUnitData
+    SESSION_ACTIVE --> SESSION_ACTIVE : ListServices
+    SESSION_ACTIVE --> SESSION_ACTIVE : ListIdentity
+    SESSION_ACTIVE --> SESSION_ACTIVE : ListInterfaces
+    SESSION_ACTIVE --> SESSION_ACTIVE : NOP
+    SESSION_ACTIVE --> SESSION_ACTIVE : ListInterfaces
+    SESSION_ACTIVE --> SESSION_TERMINATING : Timeout
+    SESSION_TERMINATING --> IDLE : Session terminated
+    SESSION_REGISTERING --> IDLE : Registration failed
+    SESSION_ACTIVE --> IDLE : Timeout
+```
+
+### Explanation of the State Machine:
+
+1. **States**:
+   - **IDLE**: The initial state where no session is established.
+   - **SESSION_REGISTERING**: The state where a session is being registered through the `RegisterSession` command.
+   - **SESSION_ACTIVE**: The state where the session is active, and various commands can be processed.
+   - **SESSION_TERMINATING**: The state where the session is being terminated through the `UnRegisterSession` command.
+
+2. **Transitions**:
+   - **IDLE to SESSION_REGISTERING**: Triggered by the `RegisterSession` command.
+   - **SESSION_REGISTERING to SESSION_ACTIVE**: Transition occurs when the session is successfully registered.
+   - **SESSION_ACTIVE to SESSION_TERMINATING**: Triggered by the `UnRegisterSession` command.
+   - **SESSION_ACTIVE to SESSION_ACTIVE**: Various commands such as `SendRRData`, `SendUnitData`, `ListServices`, `ListIdentity`, `ListInterfaces`, and `NOP` can be processed while in this state.
+   - **SESSION_ACTIVE to SESSION_TERMINATING**: This can also occur due to a timeout event.
+   - **SESSION_TERMINATING to IDLE**: The state returns to IDLE after the session is terminated.
+   - **SESSION_REGISTERING to IDLE**: This transition occurs if the registration fails (for example, due to unsupported protocol version).
+   - **SESSION_ACTIVE to IDLE**: A timeout event can cause the session to terminate, returning to IDLE.
+
+This state machine provides a clear representation of how the EtherNet/IP protocol transitions between different states in response to various commands and events, which is essential for protocol fuzzing tests and analysis.

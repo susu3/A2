@@ -1,0 +1,212 @@
+{
+  "protocol": "MODBUS TCP",
+  "endian": "big",
+  "messages": [
+    {
+      "message_name": "Read Coils",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x01
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfCoils",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 2000"
+        }
+      ]
+    },
+    {
+      "message_name": "Read Discrete Inputs",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x02
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfInputs",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 2000"
+        }
+      ]
+    },
+    {
+      "message_name": "Read Holding Registers",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x03
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfRegisters",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 125"
+        }
+      ]
+    },
+    {
+      "message_name": "Read Input Registers",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x04
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfInputRegisters",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 125"
+        }
+      ]
+    },
+    {
+      "message_name": "Write Single Coil",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x05
+        },
+        {
+          "field_name": "OutputAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "OutputValue",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 (OFF) or 0xFF00 (ON)"
+        }
+      ]
+    },
+    {
+      "message_name": "Write Single Register",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x06
+        },
+        {
+          "field_name": "RegisterAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "RegisterValue",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        }
+      ]
+    },
+    {
+      "message_name": "Write Multiple Coils",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x0F
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfOutputs",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 2000"
+        },
+        {
+          "field_name": "ByteCount",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "N (where N = QuantityOfOutputs / 8)"
+        },
+        {
+          "field_name": "OutputsValue",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "Write Multiple Registers",
+      "fields": [
+        {
+          "field_name": "FunctionCode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "default_value": 0x10
+        },
+        {
+          "field_name": "StartingAddress",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "0x0000 to 0xFFFF"
+        },
+        {
+          "field_name": "QuantityOfRegisters",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 123"
+        },
+        {
+          "field_name": "ByteCount",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "N (where N = QuantityOfRegisters * 2)"
+        },
+        {
+          "field_name": "RegistersValue",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    }
+  ]
+}

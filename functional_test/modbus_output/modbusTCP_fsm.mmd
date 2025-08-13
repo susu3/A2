@@ -1,0 +1,41 @@
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> CONNECTED : Connect
+    CONNECTED --> WAITING_FOR_REQUEST : AcceptConnection
+    WAITING_FOR_REQUEST --> PROCESSING_REQUEST : ReceiveRequest
+    PROCESSING_REQUEST --> SENDING_RESPONSE : BuildResponse
+    SENDING_RESPONSE --> WAITING_FOR_CONFIRMATION : SendResponse
+    WAITING_FOR_CONFIRMATION --> CONFIRMATION_RECEIVED : ReceiveConfirmation
+    WAITING_FOR_CONFIRMATION --> ERROR : Timeout
+    CONFIRMATION_RECEIVED --> WAITING_FOR_REQUEST : ProcessNextRequest
+    ERROR --> DISCONNECTED : HandleError
+    DISCONNECTED --> [*]
+    CONNECTED --> DISCONNECTED : CloseConnection
+```
+
+### Explanation of States and Transitions:
+
+1. **States:**
+   - **IDLE**: The initial state where no connections are established.
+   - **CONNECTED**: The state after a successful connection is established with the client.
+   - **WAITING_FOR_REQUEST**: The server is waiting for a request from the client.
+   - **PROCESSING_REQUEST**: The server is processing the received request.
+   - **SENDING_RESPONSE**: The server is sending the response back to the client.
+   - **WAITING_FOR_CONFIRMATION**: The server is waiting for a confirmation from the client after sending the response.
+   - **CONFIRMATION_RECEIVED**: The server has received confirmation from the client.
+   - **ERROR**: An error state that indicates a problem occurred (e.g., timeout, invalid request).
+   - **DISCONNECTED**: The state when the connection is closed.
+
+2. **Transitions:**
+   - **Connect**: Triggered by a client connection request.
+   - **AcceptConnection**: Acknowledges that the connection is accepted.
+   - **ReceiveRequest**: Triggered when a request is received from the client.
+   - **BuildResponse**: The server constructs a response based on the client's request.
+   - **SendResponse**: The server sends the response back to the client.
+   - **ReceiveConfirmation**: Triggered when the server receives confirmation from the client.
+   - **Timeout**: Indicates that a timeout occurred while waiting for confirmation.
+   - **ProcessNextRequest**: The server is ready to process the next request.
+   - **HandleError**: Manages any errors that occur during processing.
+   - **CloseConnection**: The server closes the connection, transitioning to the disconnected state.
+
+This state machine provides a clear overview of the Modbus TCP protocol's operational states and transitions, which is essential for protocol fuzzing tests and understanding the communication flow.

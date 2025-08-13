@@ -1,0 +1,12 @@
+```
+
+### TXT File Content:
+
+The following important information cannot be organized in JSON format:
+
+1. The value of the field "Length" is the sum of the length of all the following fields, that is, the length of the field "ASDU" plus 4 bytes.
+2. In the U-Frame, only one of the first six bits of the field "ControlField1" can be 1.
+3. The command and subcommand for accessing the SLMP compatible devices must match the specified devices as per the protocol documentation.
+4. The handling of each field must adhere to the specified data types and constraints as mentioned in the protocol documentation.
+
+This protocol message grammar is organized to facilitate protocol fuzzing tests and ensure clarity in the structure and requirements of SLMP request messages.

@@ -1,0 +1,612 @@
+{
+  "protocol": "SLMP",
+  "endian": "big",
+  "messages": [
+    {
+      "message_name": "Read",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0401
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfPoints",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 960"
+        }
+      ]
+    },
+    {
+      "message_name": "Write",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1401
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfPoints",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 960"
+        },
+        {
+          "field_name": "WriteData",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "ReadRandom",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0403
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfPoints",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 960"
+        }
+      ]
+    },
+    {
+      "message_name": "WriteRandom",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1402
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfPoints",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 960"
+        },
+        {
+          "field_name": "WriteData",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "EntryMonitorDevice",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0801
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        }
+      ]
+    },
+    {
+      "message_name": "ExecuteMonitor",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0802
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        }
+      ]
+    },
+    {
+      "message_name": "ReadBlock",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0406
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfBlocks",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 60"
+        }
+      ]
+    },
+    {
+      "message_name": "WriteBlock",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1406
+        },
+        {
+          "field_name": "DeviceCode",
+          "field_type": "string",
+          "field_length": "variable",
+          "dependency": true
+        },
+        {
+          "field_name": "HeadDeviceNo",
+          "field_type": "uint16",
+          "field_length": 2
+        },
+        {
+          "field_name": "NumberOfBlocks",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 60"
+        },
+        {
+          "field_name": "WriteData",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "RemoteRun",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1001
+        },
+        {
+          "field_name": "Mode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "0 or 1"
+        },
+        {
+          "field_name": "ClearMode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "0 to 2"
+        }
+      ]
+    },
+    {
+      "message_name": "RemoteStop",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1002
+        }
+      ]
+    },
+    {
+      "message_name": "RemotePause",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1003
+        },
+        {
+          "field_name": "Mode",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "0 or 1"
+        }
+      ]
+    },
+    {
+      "message_name": "RemoteLatchClear",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1005
+        }
+      ]
+    },
+    {
+      "message_name": "RemoteReset",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1006
+        }
+      ]
+    },
+    {
+      "message_name": "ReadTypeName",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0101
+        }
+      ]
+    },
+    {
+      "message_name": "Lock",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1631
+        },
+        {
+          "field_name": "PasswordLength",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "4"
+        },
+        {
+          "field_name": "Password",
+          "field_type": "string",
+          "field_length": "4"
+        }
+      ]
+    },
+    {
+      "message_name": "Unlock",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1630
+        },
+        {
+          "field_name": "PasswordLength",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "4"
+        },
+        {
+          "field_name": "Password",
+          "field_type": "string",
+          "field_length": "4"
+        }
+      ]
+    },
+    {
+      "message_name": "ReadDirectoryFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1810
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "SearchDirectoryFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1811
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "NewFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1820
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileSize",
+          "field_type": "uint32",
+          "field_length": 4
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "DeleteFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1822
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "CopyFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1824
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "SourceFileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "SourceFileName",
+          "field_type": "string",
+          "field_length": "variable"
+        },
+        {
+          "field_name": "DestinationFileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "DestinationFileName",
+          "field_type": "string",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "ChangeFileState",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1825
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        },
+        {
+          "field_name": "NewState",
+          "field_type": "uint8",
+          "field_length": 1,
+          "value_range": "0 (read-only) or 1 (read/write)"
+        }
+      ]
+    },
+    {
+      "message_name": "ChangeFileDate",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x1826
+        },
+        {
+          "field_name": "DriveNo",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileNameLength",
+          "field_type": "uint8",
+          "field_length": 1
+        },
+        {
+          "field_name": "FileName",
+          "field_type": "string",
+          "field_length": "variable"
+        },
+        {
+          "field_name": "NewDate",
+          "field_type": "uint32",
+          "field_length": 4
+        },
+        {
+          "field_name": "NewTime",
+          "field_type": "uint32",
+          "field_length": 4
+        }
+      ]
+    },
+    {
+      "message_name": "CloseFile",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x182A
+        },
+        {
+          "field_name": "FilePointerNo",
+          "field_type": "uint16",
+          "field_length": 2
+        }
+      ]
+    },
+    {
+      "message_name": "LoopbackTest",
+      "fields": [
+        {
+          "field_name": "Subcommand",
+          "field_type": "uint16",
+          "field_length": 2,
+          "default_value": 0x0619
+        },
+        {
+          "field_name": "NumberOfLoopbackData",
+          "field_type": "uint16",
+          "field_length": 2,
+          "value_range": "1 to 960"
+        },
+        {
+          "field_name": "LoopbackData",
+          "field_type": "byte[]",
+          "field_length": "variable"
+        }
+      ]
+    }
+  ]
+}

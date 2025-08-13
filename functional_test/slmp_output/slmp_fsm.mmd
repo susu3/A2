@@ -1,0 +1,61 @@
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> CONNECTING : ConnectRequest
+    CONNECTING --> CONNECTED : ConnectionEstablished
+    CONNECTED --> WAITING_FOR_REQUEST : Ready
+    WAITING_FOR_REQUEST --> PROCESSING_REQUEST : ReceiveRequest
+    PROCESSING_REQUEST --> SENDING_RESPONSE : ProcessRequest
+    SENDING_RESPONSE --> WAITING_FOR_REQUEST : SendResponse
+    WAITING_FOR_REQUEST --> DISCONNECTED : DisconnectRequest
+    CONNECTED --> DISCONNECTED : ConnectionLost
+    DISCONNECTED --> [*] : DisconnectComplete
+
+    %% Additional states for SLMP specific commands
+    PROCESSING_REQUEST --> READ_COMMAND : ReadCommand
+    PROCESSING_REQUEST --> WRITE_COMMAND : WriteCommand
+    PROCESSING_REQUEST --> RANDOM_READ_COMMAND : RandomReadCommand
+    PROCESSING_REQUEST --> RANDOM_WRITE_COMMAND : RandomWriteCommand
+    PROCESSING_REQUEST --> ENTRY_MONITOR_COMMAND : EntryMonitorCommand
+    PROCESSING_REQUEST --> EXECUTE_MONITOR_COMMAND : ExecuteMonitorCommand
+    PROCESSING_REQUEST --> READ_BLOCK_COMMAND : ReadBlockCommand
+    PROCESSING_REQUEST --> WRITE_BLOCK_COMMAND : WriteBlockCommand
+    PROCESSING_REQUEST --> FILE_CONTROL_COMMAND : FileControlCommand
+
+    %% Handling remote operations
+    CONNECTED --> REMOTE_RUN : RemoteRunCommand
+    CONNECTED --> REMOTE_STOP : RemoteStopCommand
+    CONNECTED --> REMOTE_PAUSE : RemotePauseCommand
+    CONNECTED --> REMOTE_LATCH_CLEAR : RemoteLatchClearCommand
+    CONNECTED --> REMOTE_RESET : RemoteResetCommand
+    CONNECTED --> READ_TYPE_NAME : ReadTypeNameCommand
+
+    %% Handling errors
+    PROCESSING_REQUEST --> ERROR_STATE : ErrorOccurred
+    ERROR_STATE --> WAITING_FOR_REQUEST : HandleError
+```
+
+### Explanation of States and Transitions:
+
+1. **IDLE**: The initial state where the protocol is waiting for a connection.
+2. **CONNECTING**: The state where a connection request is being processed.
+3. **CONNECTED**: Indicates that the connection has been established successfully.
+4. **WAITING_FOR_REQUEST**: The state where the protocol is ready to receive commands from the external device.
+5. **PROCESSING_REQUEST**: The state where the protocol is processing a received request.
+6. **SENDING_RESPONSE**: The state where the protocol is sending a response back to the external device.
+7. **DISCONNECTED**: Indicates that the connection has been terminated.
+8. **ERROR_STATE**: A state that handles errors that may occur during processing.
+
+### Events and Actions:
+- **ConnectRequest**: Triggered when a connection request is made.
+- **ConnectionEstablished**: Triggered when the connection is successfully established.
+- **ReceiveRequest**: Triggered when a request is received from the external device.
+- **ProcessRequest**: The action taken to process the received request.
+- **SendResponse**: The action taken to send a response back to the external device.
+- **DisconnectRequest**: Triggered when a disconnect request is initiated.
+- **ConnectionLost**: Triggered when the connection is lost unexpectedly.
+- **ErrorOccurred**: Triggered when an error occurs during processing.
+
+### SLMP Specific Commands:
+- **ReadCommand**, **WriteCommand**, etc.: These commands represent specific operations that can be performed as part of the request processing.
+
+This state machine provides a structured overview of the SLMP protocol's operational flow, which can be helpful for fuzz testing and further protocol analysis.

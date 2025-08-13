@@ -1,0 +1,53 @@
+{
+  "protocol": "MODBUS",
+  "endian": "big",
+  "messages": [
+    {
+      "message_name": "MODBUS Request",
+      "fields": [
+        {
+          "field_name": "Transaction Identifier",
+          "field_type": "uint16",
+          "field_length": 2,
+          "dependency": "false",
+          "default_value": null
+        },
+        {
+          "field_name": "Protocol Identifier",
+          "field_type": "uint16",
+          "field_length": 2,
+          "dependency": "false",
+          "default_value": 0
+        },
+        {
+          "field_name": "Length",
+          "field_type": "uint16",
+          "field_length": 2,
+          "dependency": "true",
+          "default_value": null
+        },
+        {
+          "field_name": "Unit Identifier",
+          "field_type": "uint8",
+          "field_length": 1,
+          "dependency": "false",
+          "default_value": 255
+        },
+        {
+          "field_name": "Function Code",
+          "field_type": "uint8",
+          "field_length": 1,
+          "dependency": "false",
+          "default_value": null
+        },
+        {
+          "field_name": "Data",
+          "field_type": "byte[]",
+          "field_length": "variable",
+          "dependency": "true",
+          "default_value": null
+        }
+      ]
+    }
+  ]
+}

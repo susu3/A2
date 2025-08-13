@@ -1,0 +1,6 @@
+### TXT Explanation:
+- **Length Field Dependency**: The value of the "Length" field is determined by the sum of the lengths of all fields following it, specifically the length of the "ASDU" plus 4 bytes for the control fields.
+- **ControlField1 in U-Frame**: Only one of the first six bits of the "ControlField1" in the U-Frame can be set to 1, which is used to specify different control functions like STARTDT, STOPDT, and TESTFR.
+- **ASDU Structure**: The ASDU structure is variable and depends on the type of data being transmitted. It includes fields like TypeID, Cause of Transmission, and Information Object Address, among others, which are defined in the IEC 104 standard.
+- **S-Frame ControlField1**: The S-Frame uses the last two bits of ControlField1 to indicate supervisory functions, with the bit pattern '01'.
+- **ASDU Constraints**: The ASDU must include fields such as TypeID, Cause of Transmission, and Information Object Address, which are critical for the correct interpretation and routing of the message.

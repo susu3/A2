@@ -1,0 +1,30 @@
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> CONNECTED : Connect
+    CONNECTED --> WAITING_FOR_REQUEST : ReceiveRequest
+    WAITING_FOR_REQUEST --> PROCESSING_REQUEST : ValidateRequest
+    PROCESSING_REQUEST --> SENDING_RESPONSE : ProcessRequest
+    SENDING_RESPONSE --> WAITING_FOR_REQUEST : SendResponse
+    WAITING_FOR_REQUEST --> DISCONNECTED : Timeout
+    PROCESSING_REQUEST --> DISCONNECTED : Error
+    SENDING_RESPONSE --> DISCONNECTED : Error
+    DISCONNECTED --> [*]
+```
+
+### Explanation:
+1. **IDLE**: The initial state where the system is waiting to establish a connection.
+2. **CONNECTED**: Represents the state when a connection is established.
+3. **WAITING_FOR_REQUEST**: The state where the server waits for incoming requests.
+4. **PROCESSING_REQUEST**: Upon receiving a request, the server validates and processes it.
+5. **SENDING_RESPONSE**: After processing, the server sends a response back to the client.
+6. **DISCONNECTED**: Represents the state when the connection is terminated due to timeout or error.
+7. **Transitions**:
+   - `Connect`: Transition from IDLE to CONNECTED when a connection is established.
+   - `ReceiveRequest`: Transition from CONNECTED to WAITING_FOR_REQUEST when a request is received.
+   - `ValidateRequest`: Transition from WAITING_FOR_REQUEST to PROCESSING_REQUEST when a request is being validated.
+   - `ProcessRequest`: Transition from PROCESSING_REQUEST to SENDING_RESPONSE when a request is processed.
+   - `SendResponse`: Transition from SENDING_RESPONSE back to WAITING_FOR_REQUEST after sending a response.
+   - `Timeout`: Transition from WAITING_FOR_REQUEST to DISCONNECTED if a timeout occurs.
+   - `Error`: Transition from PROCESSING_REQUEST or SENDING_RESPONSE to DISCONNECTED if an error occurs.
+
+This state machine provides a simplified view of the MODBUS protocol handling process, focusing on the core states and transitions involved in processing requests and maintaining connections.

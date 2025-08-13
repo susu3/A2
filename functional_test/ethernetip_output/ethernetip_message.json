@@ -1,0 +1,405 @@
+{
+  "protocol": "EtherNet/IP",
+  "endian": "little",
+  "messages": [
+    {
+      "message_name": "NOP",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0000"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "dependency": true
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Unused Data",
+          "field_type": "ARRAY of octet",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "ListIdentity",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0063"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Item Count",
+          "field_type": "UINT",
+          "field_length": 4
+        },
+        {
+          "field_name": "ListIdentity Items",
+          "field_type": "STRUCT",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "ListInterfaces",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0064"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Item Count",
+          "field_type": "UINT",
+          "field_length": 4
+        },
+        {
+          "field_name": "Target Items",
+          "field_type": "STRUCT",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "RegisterSession",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0065"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 4
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Protocol Version",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 1
+        },
+        {
+          "field_name": "Options Flags",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        }
+      ]
+    },
+    {
+      "message_name": "UnRegisterSession",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0066"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        }
+      ]
+    },
+    {
+      "message_name": "ListServices",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0004"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        }
+      ]
+    },
+    {
+      "message_name": "SendRRData",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x006F"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "dependency": true
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Interface Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Timeout",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Encapsulated Packet",
+          "field_type": "ARRAY of octet",
+          "field_length": "variable"
+        }
+      ]
+    },
+    {
+      "message_name": "SendUnitData",
+      "fields": [
+        {
+          "field_name": "Command",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": "0x0070"
+        },
+        {
+          "field_name": "Length",
+          "field_type": "UINT",
+          "field_length": 4,
+          "dependency": true
+        },
+        {
+          "field_name": "Session Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Status",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Sender Context",
+          "field_type": "ARRAY of octet",
+          "field_length": 8,
+          "default_value": "0"
+        },
+        {
+          "field_name": "Options",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Interface Handle",
+          "field_type": "UDINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Timeout",
+          "field_type": "UINT",
+          "field_length": 4,
+          "default_value": 0
+        },
+        {
+          "field_name": "Encapsulated Packet",
+          "field_type": "ARRAY of octet",
+          "field_length": "variable"
+        }
+      ]
+    }
+  ]
+}

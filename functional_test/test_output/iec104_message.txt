@@ -1,0 +1,14 @@
+```
+
+**TXT:**
+The value of the field "Length" is the sum of the length of all the following fields, that is, the length of the field "ASDU" plus 4 bytes. 
+
+In the U-Frame, only one of the first six bits of the field "ControlField1" can be 1. 
+
+The ASDU contains two main sections: the data unit identifier (with the fixed length of six bytes) and the data itself, made up of one or more information objects. The data unit identifier defines the specific type of data, provides addressing to identify the specific identity of the data, and includes additional information as cause of transmission. Each ASDU can transmit a maximum of 127 objects. 
+
+The "SQ" (Structure Qualifier) bit specifies how information objects or elements are addressed. "SQ=0" indicates a sequence of information objects, while "SQ=1" indicates addressing of a sequence of single information elements or equal combinations of information elements of a single object per ASDU. 
+
+The information object address (IOA) identifies the particular data within a defined station and its length is 3 bytes for IEC 104. All information objects transmitted by one ASDU must have the same ASDU type. 
+
+The number of information objects and information elements within the ASDU is specified in the header, with the format and length defined by the standard for each object type.

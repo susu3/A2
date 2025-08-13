@@ -1,0 +1,42 @@
+stateDiagram-v2
+    [*] --> DISCONNECTED
+    DISCONNECTED --> CONNECTING : Start Connection
+    CONNECTING --> CONNECTED : Connection Established
+    CONNECTED --> START_DATA_TRANSFER : Send STARTDT
+    START_DATA_TRANSFER --> DATA_TRANSFER : STARTDT Confirmed
+    DATA_TRANSFER --> WAITING_FOR_RESPONSE : Send Request
+    WAITING_FOR_RESPONSE --> RESPONSE_RECEIVED : Receive Response
+    WAITING_FOR_RESPONSE --> TIMEOUT : Timeout
+    RESPONSE_RECEIVED --> DATA_TRANSFER : Process Response
+    DATA_TRANSFER --> WAITING_FOR_RESPONSE : Send Next Request
+    WAITING_FOR_RESPONSE --> DISCONNECTED : Send STOPDT
+    DISCONNECTED --> [*]
+    TIMEOUT --> DISCONNECTED : Connection Closed
+```
+
+### Explanation of the State Machine:
+
+1. **States**:
+   - **DISCONNECTED**: Initial state where no connection exists.
+   - **CONNECTING**: Transitioning to an active connection.
+   - **CONNECTED**: Successfully established connection.
+   - **START_DATA_TRANSFER**: Sending the command to start data transfer.
+   - **DATA_TRANSFER**: Active state where data is being sent and received.
+   - **WAITING_FOR_RESPONSE**: Waiting for a response after a request is sent.
+   - **RESPONSE_RECEIVED**: Acknowledgment of a response received from the other party.
+   - **TIMEOUT**: Indicating a timeout situation during communication.
+
+2. **Transitions**:
+   - The state transitions are triggered by specific events such as sending connection commands, receiving responses, or timing out.
+
+3. **Events**:
+   - **Start Connection**: Initiates the connection process.
+   - **Connection Established**: Indicates a successful connection.
+   - **Send STARTDT**: Command to begin data transfer.
+   - **STARTDT Confirmed**: Confirmation of the data transfer start.
+   - **Send Request**: Sending a request for data.
+   - **Receive Response**: Receiving a response from the other station.
+   - **Timeout**: Indicates that a response was not received in the expected timeframe.
+   - **Send STOPDT**: Command to stop data transfer.
+
+This state machine provides a high-level overview of the operational flow within the IEC 60870-5-104 protocol, suitable for constructing protocol messages for fuzzing tests.

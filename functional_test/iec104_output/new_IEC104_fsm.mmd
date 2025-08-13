@@ -1,0 +1,39 @@
+stateDiagram-v2
+    [*] --> DISCONNECTED
+    DISCONNECTED --> CONNECTING : Establish TCP Connection
+    CONNECTING --> STOPPED : TCP Connection Established
+    STOPPED --> STARTING : STARTDT act
+    STARTING --> RUNNING : STARTDT con
+    RUNNING --> STOPPING : STOPDT act
+    STOPPING --> STOPPED : STOPDT con
+    RUNNING --> TESTING : TESTFR act
+    TESTING --> RUNNING : TESTFR con
+    RUNNING --> DISCONNECTED : TCP Connection Lost
+    STOPPED --> DISCONNECTED : Close TCP Connection
+
+    % Handling I-Format, S-Format, and U-Format APDUs
+    RUNNING --> RUNNING : Send I-Format APDU
+    RUNNING --> RUNNING : Receive I-Format APDU
+    RUNNING --> RUNNING : Send S-Format APDU
+    RUNNING --> RUNNING : Receive S-Format APDU
+    RUNNING --> RUNNING : Send U-Format APDU
+    RUNNING --> RUNNING : Receive U-Format APDU
+
+    % Handling of ASDU Messages
+    RUNNING --> RUNNING : Send ASDU
+    RUNNING --> RUNNING : Receive ASDU
+
+    % Handling of Specific Commands
+    RUNNING --> RUNNING : Send Interrogation Command
+    RUNNING --> RUNNING : Receive Interrogation Response
+    RUNNING --> RUNNING : Send Command (e.g., Single/Double Command)
+    RUNNING --> RUNNING : Receive Command Confirmation
+
+    % Additional Transitions
+    STOPDT --> STARTDT : STARTDT act
+    STARTDT --> DATA_TRANSFER : STARTDT con
+    DATA_TRANSFER --> STOPDT : STOPDT act
+    STOPDT --> STOPDT : STOPDT con
+    DATA_TRANSFER --> TESTFR : TESTFR act
+    TESTFR --> DATA_TRANSFER : TESTFR con
+```

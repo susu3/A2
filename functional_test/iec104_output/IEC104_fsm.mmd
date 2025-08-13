@@ -1,0 +1,45 @@
+stateDiagram-v2
+    [*] --> DISCONNECTED
+    DISCONNECTED --> CONNECTING : Establish TCP Connection
+    CONNECTING --> STOPPED : TCP Connection Established
+    STOPPED --> STARTING : STARTDT act
+    STARTING --> RUNNING : STARTDT con
+    RUNNING --> STOPPING : STOPDT act
+    STOPPING --> STOPPED : STOPDT con
+    RUNNING --> TESTING : TESTFR act
+    TESTING --> RUNNING : TESTFR con
+    RUNNING --> DISCONNECTED : TCP Connection Lost
+    STOPPED --> DISCONNECTED : Close TCP Connection
+
+    % Handling I-Format, S-Format, and U-Format APDUs
+    RUNNING --> RUNNING : Send I-Format APDU
+    RUNNING --> RUNNING : Receive I-Format APDU
+    RUNNING --> RUNNING : Send S-Format APDU
+    RUNNING --> RUNNING : Receive S-Format APDU
+    RUNNING --> RUNNING : Send U-Format APDU
+    RUNNING --> RUNNING : Receive U-Format APDU
+
+    % Handling of ASDU Messages
+    RUNNING --> RUNNING : Send ASDU
+    RUNNING --> RUNNING : Receive ASDU
+
+    % Handling of Specific Commands
+    RUNNING --> RUNNING : Send Interrogation Command
+    RUNNING --> RUNNING : Receive Interrogation Response
+    RUNNING --> RUNNING : Send Command (e.g., Single/Double Command)
+    RUNNING --> RUNNING : Receive Command Confirmation
+```
+
+### Explanation:
+1. **DISCONNECTED**: Initial state where no TCP connection is established.
+2. **CONNECTING**: Transition to this state occurs when a TCP connection is being established.
+3. **STOPPED**: Once the TCP connection is established, the protocol enters the STOPPED state, waiting for a STARTDT act to start data transfer.
+4. **STARTING**: The protocol transitions to this state upon receiving a STARTDT act.
+5. **RUNNING**: The protocol is in the RUNNING state after receiving a STARTDT con, allowing normal data transfer operations.
+6. **STOPPING**: Transition to this state occurs upon receiving a STOPDT act, indicating the intention to stop data transfer.
+7. **TESTING**: Occurs when a TESTFR act is sent to check the status of the connection.
+8. **DISCONNECTED**: The protocol returns to this state if the TCP connection is lost or intentionally closed.
+
+### Note:
+- The state machine handles different APDU formats (I, S, U) and ASDU messages, which are crucial for the protocol's operation.
+- Specific commands like interrogation and control commands are part of the RUNNING state transitions, reflecting the protocol's functionality in managing data transfer and control operations.

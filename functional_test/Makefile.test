@@ -1,0 +1,19 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -DTEST_PROTOCOL_ANALYSIS
+LDFLAGS = -lcurl -ljson-c -lpcre2-8
+
+all: protocol-analyzer
+
+protocol-analyzer:../chat-llm.c
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+
+clean:
+	rm -f protocol-analyzer
+
+.PHONY: all clean
+
+test: protocol-analyzer
+	@echo "Running protocol analysis test..."
+	@mkdir -p test_output
+	./protocol-analyzer iec104 ../sample_specs/iec104.md test_output
+	@echo "Check test_output directory for generated files." 

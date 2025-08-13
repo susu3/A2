@@ -1,0 +1,15 @@
+```
+
+### TXT File for Important Information
+The following important information is saved in a separate text file:
+
+```
+1. The "QuantityOfCoils" in the "Read Coils" request is limited to a maximum of 2000.
+2. The "Length" field in the MBAP header must accurately reflect the number of bytes in the remaining fields.
+3. The "OutputValue" for the "Write Single Coil" request must be either 0x0000 (OFF) or 0xFF00 (ON). Any other value is considered illegal and will not affect the output.
+4. The "QuantityOfRegisters" in the "Read Holding Registers" and "Read Input Registers" requests is limited to a maximum of 125.
+5. For the "Write Multiple Coils" request, the "ByteCount" must be calculated as the number of bytes required to represent the output values, which is dependent on the number of outputs requested.
+6. The server must return an exception response if the requested address is out of range or if the function code is not supported.
+```
+
+This structured representation should facilitate the protocol fuzzing test for the MODBUS TCP protocol by providing clear definitions of the request message structure and constraints.
