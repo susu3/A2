@@ -288,59 +288,16 @@ char *chat_with_llm(char *prompt, int tries, float temperature)
 //   - protocol_name: Name of the protocol (e.g., "MODBUS", "IEC104")
 //   - final_msg: Pointer to a char pointer that will store the final message
 //   - seedfile_path: Path to the directory containing seed files
-//   - rfc_path: Path to the RFC document file
 // Returns:
 //   A dynamically allocated string containing the formatted prompt for the LLM,
 //   or NULL if an error occurs during file reading or memory allocation.
-char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, const char *seedfile_path, char *rfc_path)
+char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, const char *seedfile_path)
 {   
     char *prompt_grammars = NULL;
     char *msg = NULL;
     char *examples_str = NULL;
     char *example_seeds[2] = {NULL, NULL};
-    printf("Constructing prompt for seeds message with RFC and example seed files\n");
-
-    // Read RFC content
-    // Basic path validation to prevent directory traversal
-    if (strstr(rfc_path, "../") || strstr(rfc_path, "..\\")) {
-        fprintf(stderr, "Error: Unsafe RFC path detected: %s\n", rfc_path);
-        return NULL;
-    }
-    
-    FILE *fp = fopen(rfc_path, "r");
-    if (fp == NULL){
-        fprintf(stderr, "Error opening RFC file %s\n", rfc_path);
-        return NULL;
-    }
-    
-    // Get file size safely
-    if (fseek(fp, 0, SEEK_END) != 0) {
-        fclose(fp);
-        return NULL;
-    }
-    long file_size = ftell(fp);
-    if (file_size == -1) {
-        fclose(fp);
-        return NULL;
-    }
-    rewind(fp);
-
-    // Allocate memory for RFC content
-    char *rfc_file_content = malloc(file_size + 1);
-    if (rfc_file_content == NULL){
-        fprintf(stderr, "Error allocating memory for %s\n", rfc_path);
-        fclose(fp);
-        return NULL;
-    }
-
-    // Read file content
-    size_t bytes_read = fread(rfc_file_content, 1, file_size, fp);
-    fclose(fp);
-    if (bytes_read != (size_t)file_size) {
-        free(rfc_file_content);
-        return NULL;
-    }
-    rfc_file_content[file_size] = '\0';
+    printf("Constructing prompt for seeds message with example seed files\n");
 
     // Load example seed files
     int example_count = 0;
@@ -379,10 +336,19 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
         closedir(dir);
     }
 
-    // Construct examples string
+    // Construct examples string - actually use the loaded example seeds
     if (example_count > 0) {
         if (asprintf(&examples_str, "Here are some example seed files for the %s protocol:\n", protocol_name) == -1) {
             examples_str = strdup("");
+        } else {
+            // Append the actual example seed content
+            for (int i = 0; i < example_count; i++) {
+                char *new_examples;
+                if (asprintf(&new_examples, "%sExample %d: <sequence>%s</sequence>\n", examples_str, i + 1, example_seeds[i]) != -1) {
+                    free(examples_str);
+                    examples_str = new_examples;
+                }
+            }
         }
     } else {
         examples_str = strdup("");
@@ -393,7 +359,7 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
     }
 
     // Construct the final message
-    if (asprintf(&msg, "You are an expert in %s protocol fuzz testing. Your task is to generate **valid initial request messages** for fuzzing a binary protocol, using the **protocol specification**, writen in natural language, which is the authoritative source describing the protocol's correct structure and behavior. \\n"
+    if (asprintf(&msg, "You are an expert in %s protocol fuzz testing. Your task is to generate **valid initial request messages** for fuzzing a binary protocol. \\n"
         "The goal is to generate as many diverse and well-formed **request messages** as possible, suitable as fuzzing seeds.\n"
         "### Output format:\n"
         "- Wrap each request example with <sequence></sequence>.\n"
@@ -404,12 +370,9 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
         "### Example (format only):\n"
         "For the MODBUS protocol, a request sequence example is (in hex): <sequence>0000 0000 0008 FF16 0004 00F2 0025</sequence>\n"
         "For the IEC104 protocol, a request sequence example is (in hex): <sequence>6804 0700 0000 6804 4300 0000 6804 1300 0000</sequence>\n"
-        "%s"
-        "The Specification Document is as follows:\n"
-        "=== BEGIN SPEC ===\n"
-        "%s\n"
-        "=== END SPEC ===\n",
-        protocol_name, examples_str, rfc_file_content) == -1) {
+        "For the %s protocol, request sequence examples are (in hex): \n"
+        "%s",
+        protocol_name, protocol_name, examples_str) == -1) {
         goto cleanup;
     }
 
@@ -429,7 +392,6 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
 
 cleanup:
     // Cleanup
-    free(rfc_file_content);
     free(examples_str);
     for (int i = 0; i < 2; i++) {
         free(example_seeds[i]);
@@ -443,64 +405,20 @@ cleanup:
     return prompt_grammars;
 }
 
-char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg, char *rfc_path){
+char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg){
     char *msg = NULL;
-    printf("Constructing prompt for seeds sequence with RFC\n");
+    printf("Constructing prompt for seeds sequence\n");
 
-    // Read RFC content
-    // Basic path validation to prevent directory traversal
-    if (strstr(rfc_path, "../") || strstr(rfc_path, "..\\")) {
-        fprintf(stderr, "Error: Unsafe RFC path detected: %s\n", rfc_path);
-        return NULL;
-    }
-    
-    FILE *fp = fopen(rfc_path, "r");
-    if (fp == NULL){
-        fprintf(stderr, "Error opening RFC file %s\n", rfc_path);
-        return NULL;
-    }
-    
-    // Get file size safely
-    if (fseek(fp, 0, SEEK_END) != 0) {
-        fclose(fp);
-        return NULL;
-    }
-    long file_size = ftell(fp);
-    if (file_size == -1) {
-        fclose(fp);
-        return NULL;
-    }
-    rewind(fp);
-
-    // Allocate memory for RFC content
-    char *rfc_file_content = malloc(file_size + 1);
-    if (rfc_file_content == NULL){
-        fprintf(stderr, "Error allocating memory for %s\n", rfc_path);
-        fclose(fp);
-        return NULL;
-    }
-
-    // Read file content
-    size_t bytes_read = fread(rfc_file_content, 1, file_size, fp);
-    fclose(fp);
-    if (bytes_read != (size_t)file_size) {
-        free(rfc_file_content);
-        return NULL;
-    }
-    rfc_file_content[file_size] = '\0';
-
-    if (asprintf(&msg, "[{\"role\": \"user\", \"content\": \"You are an expert in %s protocol fuzz testing. Your task is to generate valid client-side request message sequences for an industrial binary protocol using the Specification Document provided below. A request sequence is a series of multiple client-side request messages, sent one after another to follow the protocol's client state machine and message grammar. Each request message must be encoded in hexadecimal and strictly follow the inferred grammar. The full sequence should simulate a realistic multi-step client session and MUST omit any server-side responses.\\n\\n"
-        "# Inputs (authoritative):\\n"
-        "- The protocol specification written in natural language. Use it to reconstruct the protocol's client message grammar and a minimal but sufficient client-side state machine. Resolve ambiguities by looking for examples, field descriptions, and constraints in the spec.\\n\\n"
+    if (asprintf(&msg, "[{\"role\": \"user\", \"content\": \"You are an expert in %s protocol fuzz testing. Your task is to generate valid client-side request message sequences for an industrial binary protocol. A request sequence is a series of multiple client-side request messages, sent one after another to follow the protocol's client state machine and message grammar. Each request message must be encoded in hexadecimal and strictly follow the grammar. The full sequence should simulate a realistic multi-step client session and MUST omit any server-side responses.\\n\\n"
         "# What you must do (silently, no extra text in output):\\n"
-        "1) From the Specification Document, silently reconstruct a client-side state machine (states, allowed client requests, transitions) and a message grammar (fields, sizes, types, constraints, computed fields like length/CRC, alignment/padding rules).\\n"
-        "2) Validate that each planned path uses CLIENT REQUESTS ONLY (no server frames) and is a valid path through the inferred client state machine.\\n"
+        "1) Construct a client-side state machine (states, allowed client requests, transitions) and a message grammar (fields, sizes, types, constraints, computed fields like length/CRC, alignment/padding rules).\\n"
+        "2) Validate that each planned path uses CLIENT REQUESTS ONLY (no server frames) and is a valid path.\\n"
         "3) For each request message you will output: apply all field constraints; compute derived fields (length, sequence numbers, checksums/CRCs) correctly; and ensure inter-message dependencies (handles, session IDs, counters) are consistent across the sequence.\\n"
         "4) Encoding rules:\\n"
-        "   - Output message bytes in hexadecimal. Insert a space every 4 hex digits (e.g., \\\"AABB CCDD ...\\\").\\n"
-        "   - Follow the endianness implied by the spec. If the spec is silent and no examples imply otherwise, default to network byte order (big-endian) and be consistent.\\n"
+        "   - Output message bytes in hexadecimal. Insert a space every 4 hex digits (e.g., \\\"ABCD CCDD ...\\\").\\n"
+        "   - Follow the endianness. Default to network byte order (big-endian) and be consistent.\\n"
         "   - Pad ASCII strings with null bytes if a fixed length is required.\\n"
-        "   - If a field is optional per the spec, include or omit it according to the chosen valid path.\\n"
+        "   - If a field is optional, include or omit it according to the chosen valid path.\\n"
         "5) Output format (STRICT):\\n"
         "<sequence>\\n"
         "  <message>...</message>\\n"
@@ -511,12 +429,8 @@ char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg,
         "- Generate as many diverse, valid client-only sequences as possible, each corresponding to a distinct valid path.\\n"
         "- Vary legal field values, optional sections, and multi-step flows while respecting all constraints and cross-message dependencies. Avoid superficial repetition.\\n\\n"
         "### Example (format only):\\n"
-        "For the IEC104 protocol, an example sequence format is: <sequence><message>6804 0700 0000</message><message>6804 4300 0000</message><message>6804 1300 0000</message></sequence>\\n\\n"
-        "The Specification Document is as follows:\\n"
-        "=== BEGIN SPEC ===\\n"
-        "%s\\n"
-        "=== END SPEC ===\\n\"}]", 
-        protocol_name, rfc_file_content) == -1) {
+        "For the IEC104 protocol, an example sequence format is: <sequence><message>6804 0700 0000</message><message>6804 4300 0000</message><message>6804 1300 0000</message></sequence>\\n\\n\"}]", 
+        protocol_name) == -1) {
         FATAL("Failed to construct seeds sequence prompt");
         goto cleanup;
     }
@@ -527,7 +441,6 @@ char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg,
 
 cleanup:
     // Cleanup
-    free(rfc_file_content);
     free(msg);
     return NULL;
 }
@@ -3260,7 +3173,7 @@ void enrich_initial_seeds(void) {
 
     // 2. Generate the initial seed of sequence granularity
     printf("\nStep 2: Generating the initial seed of sequence granularity...\n");
-    char *sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question, rfc_path);
+    char *sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question);
     if (sequences_prompt == NULL) {
         printf("Failed to retrieve sequences prompt\n");
         FATAL("Failed to retrieve sequences prompt");

@@ -671,12 +671,12 @@ void enrich_initial_seeds()
 
   printf("=== PHASE 1: GENERATING MESSAGE SEEDS ===\n\n");
   // 1. generate the initial seed of message granularity
-  if (rfc_path == NULL) {
-    printf("RFC path is NULL, skipping LLM interaction\n");
-    goto cleanup;
-  }
+  // if (rfc_path == NULL) {
+  //   printf("RFC path is NULL, skipping LLM interaction\n");
+  //   goto cleanup;
+  // }
 
-  seeds_prompt = construct_prompt_for_seeds_message(protocol_name, &seed_question, seedfile_path, rfc_path);
+  seeds_prompt = construct_prompt_for_seeds_message(protocol_name, &seed_question, seedfile_path);
   if (seeds_prompt == NULL) {
     fprintf(stderr, "Failed to construct message seeds prompt\n");
     goto cleanup;
@@ -709,7 +709,7 @@ void enrich_initial_seeds()
 
   printf("\n=== PHASE 2: GENERATING SEQUENCE SEEDS ===\n\n");
   //2. generate the initial seed of sequence granularity
-  sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question, rfc_path);
+  sequences_prompt = construct_prompt_for_seeds_sequence(protocol_name, &seed_question);
   if (sequences_prompt == NULL) {
     fprintf(stderr, "Failed to construct sequence seeds prompt\n");
     goto cleanup;
@@ -9841,7 +9841,7 @@ int main(int argc, char** argv) {
       use_argv = get_qemu_argv(argv[0], argv + optind, argc - optind);
     else
       use_argv = argv + optind;
-    initial_seeds_optimization();
+    //initial_seeds_optimization();
 
     // /* Initialize RFC consistency analysis if enabled */
     // if (rfc_consistency_enabled) {
