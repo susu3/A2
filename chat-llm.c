@@ -291,12 +291,40 @@ char *chat_with_llm(char *prompt, int tries, float temperature)
 // Returns:
 //   A dynamically allocated string containing the formatted prompt for the LLM,
 //   or NULL if an error occurs during file reading or memory allocation.
+// Helper function to convert binary data to hex string with spacing every 4 hex chars
+static char* binary_to_hex_with_spaces(const unsigned char *data, size_t length) {
+    if (!data || length == 0) return NULL;
+    
+    // Calculate output size: 2 chars per byte + 1 space per 2 bytes
+    // For n bytes: 2n hex chars + (n/2 - 1) spaces (if n > 1)
+    size_t hex_chars = length * 2;
+    size_t spaces = (length > 1) ? (length / 2) : 0;
+    if (length % 2 == 1 && length > 1) spaces++; // Add space for odd byte count
+    
+    size_t output_size = hex_chars + spaces + 1;
+    char *hex_str = malloc(output_size);
+    if (!hex_str) return NULL;
+    
+    char *ptr = hex_str;
+    for (size_t i = 0; i < length; i++) {
+        ptr += sprintf(ptr, "%02X", data[i]);
+        // Add space after every 2 bytes (4 hex chars), but not at the end
+        if ((i + 1) % 2 == 0 && i + 1 < length) {
+            *ptr++ = ' ';
+        }
+    }
+    *ptr = '\0';
+    
+    return hex_str;
+}
+
 char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, const char *seedfile_path)
 {   
     char *prompt_grammars = NULL;
     char *msg = NULL;
     char *examples_str = NULL;
-    char *example_seeds[2] = {NULL, NULL};
+    unsigned char *example_seeds[2] = {NULL, NULL};
+    size_t example_sizes[2] = {0, 0};
     printf("Constructing prompt for seeds message with example seed files\n");
 
     // Load example seed files
@@ -311,21 +339,22 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
                     continue;
                 }
                 
-                FILE *seed_file = fopen(file_path, "r");
+                FILE *seed_file = fopen(file_path, "rb");  // Binary mode
                 free(file_path);
                 
                 if (seed_file != NULL) {
                     if (fseek(seed_file, 0, SEEK_END) == 0) {
                         long seed_size = ftell(seed_file);
-                        if (seed_size > 0) {
+                        if (seed_size > 0 && seed_size <= 1024) {  // Limit to 1KB for prompt
                             rewind(seed_file);
-                            example_seeds[example_count] = malloc(seed_size + 1);
+                            example_seeds[example_count] = malloc(seed_size);
                             if (example_seeds[example_count] && 
                                 fread(example_seeds[example_count], 1, seed_size, seed_file) == (size_t)seed_size) {
-                                example_seeds[example_count][seed_size] = '\0';
+                                example_sizes[example_count] = seed_size;
                                 example_count++;
                             } else {
                                 free(example_seeds[example_count]);
+                                example_seeds[example_count] = NULL;
                             }
                         }
                     }
@@ -336,17 +365,21 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
         closedir(dir);
     }
 
-    // Construct examples string - actually use the loaded example seeds
+    // Construct examples string - convert binary to hex and use the loaded example seeds
     if (example_count > 0) {
         if (asprintf(&examples_str, "Here are some example seed files for the %s protocol:\n", protocol_name) == -1) {
             examples_str = strdup("");
         } else {
-            // Append the actual example seed content
+            // Append the actual example seed content as hex
             for (int i = 0; i < example_count; i++) {
-                char *new_examples;
-                if (asprintf(&new_examples, "%sExample %d: <sequence>%s</sequence>\n", examples_str, i + 1, example_seeds[i]) != -1) {
-                    free(examples_str);
-                    examples_str = new_examples;
+                char *hex_str = binary_to_hex_with_spaces(example_seeds[i], example_sizes[i]);
+                if (hex_str) {
+                    char *new_examples;
+                    if (asprintf(&new_examples, "%sExample %d: <sequence>%s</sequence>\n", examples_str, i + 1, hex_str) != -1) {
+                        free(examples_str);
+                        examples_str = new_examples;
+                    }
+                    free(hex_str);
                 }
             }
         }
@@ -359,7 +392,7 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
     }
 
     // Construct the final message
-    if (asprintf(&msg, "You are an expert in %s protocol fuzz testing. Your task is to generate **valid initial request messages** for fuzzing a binary protocol. \\n"
+    if (asprintf(&msg, "You are an expert in %s protocol fuzz testing. Your task is to generate **valid initial request messages** for fuzzing a binary protocol.\n"
         "The goal is to generate as many diverse and well-formed **request messages** as possible, suitable as fuzzing seeds.\n"
         "### Output format:\n"
         "- Wrap each request example with <sequence></sequence>.\n"
@@ -370,7 +403,6 @@ char *construct_prompt_for_seeds_message(char *protocol_name, char **final_msg, 
         "### Example (format only):\n"
         "For the MODBUS protocol, a request sequence example is (in hex): <sequence>0000 0000 0008 FF16 0004 00F2 0025</sequence>\n"
         "For the IEC104 protocol, a request sequence example is (in hex): <sequence>6804 0700 0000 6804 4300 0000 6804 1300 0000</sequence>\n"
-        "For the %s protocol, request sequence examples are (in hex): \n"
         "%s",
         protocol_name, protocol_name, examples_str) == -1) {
         goto cleanup;
