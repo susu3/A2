@@ -478,39 +478,99 @@ cleanup:
 char *construct_prompt_for_seeds_sequence(char *protocol_name, char **final_msg){
     char *msg = NULL;
     printf("Constructing prompt for seeds sequence\n");
+    char *content = NULL;
 
-    if (asprintf(&msg, "[{\"role\": \"user\", \"content\": \"You are an expert in %s protocol fuzz testing. Your task is to generate valid client-side request message sequences for an industrial binary protocol. A request sequence is a series of multiple client-side request messages, sent one after another to follow the protocol's client state machine and message grammar. Each request message must be encoded in hexadecimal and strictly follow the grammar. The full sequence should simulate a realistic multi-step client session and MUST omit any server-side responses.\\n\\n"
-        "# What you must do (silently, no extra text in output):\\n"
-        "1) Construct a client-side state machine (states, allowed client requests, transitions) and a message grammar (fields, sizes, types, constraints, computed fields like length/CRC, alignment/padding rules).\\n"
-        "2) Validate that each planned path uses CLIENT REQUESTS ONLY (no server frames) and is a valid path.\\n"
-        "3) For each request message you will output: apply all field constraints; compute derived fields (length, sequence numbers, checksums/CRCs) correctly; and ensure inter-message dependencies (handles, session IDs, counters) are consistent across the sequence.\\n"
-        "4) Encoding rules:\\n"
-        "   - Output message bytes in hexadecimal. Insert a space every 4 hex digits (e.g., \\\"ABCD CCDD ...\\\").\\n"
-        "   - Follow the endianness. Default to network byte order (big-endian) and be consistent.\\n"
-        "   - Pad ASCII strings with null bytes if a fixed length is required.\\n"
-        "   - If a field is optional, include or omit it according to the chosen valid path.\\n"
-        "5) Output format (STRICT):\\n"
-        "<sequence>\\n"
-        "  <message>...</message>\\n"
-        "  <message>...</message>\\n"
-        "</sequence>\\n"
-        "- DO NOT output any explanations, assumptions, or comments—ONLY the sequences in the exact tags above.\\n\\n"
-        "# Diversity & Coverage:\\n"
-        "- Generate as many diverse, valid client-only sequences as possible, each corresponding to a distinct valid path.\\n"
-        "- Vary legal field values, optional sections, and multi-step flows while respecting all constraints and cross-message dependencies. Avoid superficial repetition.\\n\\n"
-        "### Example (format only):\\n"
-        "For the IEC104 protocol, an example sequence format is: <sequence><message>6804 0700 0000</message><message>6804 4300 0000</message><message>6804 1300 0000</message></sequence>\\n\\n\"}]", 
-        protocol_name) == -1) {
+    if (asprintf(&content, "You are an expert in %s protocol fuzz testing. Your task is to generate **valid request message sequences** for an industrial binary protocol. \n"
+    "\n"
+    "### What is a Request Sequence?\n"
+    "A request sequence is a series of multiple client-side request messages sent one after another to simulate a realistic multi-step client session. Each sequence must follow the protocol's state machine and grammar rules, containing only client requests (no server responses).\n"
+    "\n"
+    "### Your Task:\n"
+    "Generate at least 5-10 diverse and valid request sequences suitable as fuzzing seeds.\n"
+    "\n"
+    "### Requirements:\n"
+    "\n"
+    "**1. Follow the State Machine:**\n"
+    "   - Analyze the state machine to identify valid paths from initial state to terminal states\n"
+    "   - Extract ONLY client-side request messages (ignore server responses)\n"
+    "   - Each sequence must represent a complete, valid path through the state machine\n"
+    "   - Generate sequences for different paths to achieve diversity\n"
+    "\n"
+    "**2. Sequence Diversity:**\n"
+    "   - Use different paths through the state machine\n"
+    "   - Vary sequence lengths (short, medium, long sessions)\n"
+    "   - Include common workflows (e.g., connect -> query -> disconnect)\n"
+    "   - Include edge cases (e.g., immediate disconnect, repeated operations)\n"
+    "   - Try different combinations of message types\n"
+    "\n"
+    "**3. Message Correctness:**\n"
+    "   - Each message in the sequence must follow the JSON grammar\n"
+    "   - Apply all constraints from the TXT file\n"
+    "   - Follow the byte order (endianness) specified in the grammar\n"
+    "   - Calculate length fields accurately based on actual message content\n"
+    "   - Use appropriate default values from the grammar\n"
+    "   - Ensure messages are contextually appropriate for their position in the sequence\n"
+    "\n"
+    "**4. Encoding Format:**\n"
+    "   - Hex-encode all bytes\n"
+    "   - Add one space after every 4 hex characters (2 bytes)\n"
+    "   - Example: 6804 0700 0000 (not 68040700000)\n"
+    "\n"
+    "### Output Format:\n"
+    "```\n"
+    "<sequence>\n"
+    "  <message>hex_encoded_message_1</message>\n"
+    "  <message>hex_encoded_message_2</message>\n"
+    "  <message>hex_encoded_message_N</message>\n"
+    "</sequence>\n"
+    "```\n"
+    "\n"
+    "**Important:**\n"
+    "- Output ONLY the <sequence>...</sequence> blocks\n"
+    "- Do NOT include explanations, comments, or field names\n"
+    "- Each <message> should be on its own line\n"
+    "- Ensure proper XML-style nesting\n"
+    "\n"
+    "### Example:\n"
+    "For the IEC104 protocol, a typical connection sequence:\n"
+    "<sequence>\n"
+    "  <message>6804 0700 0000</message>\n"
+    "  <message>6804 4300 0000</message>\n"
+    "  <message>6804 1300 0000</message>\n"
+    "</sequence>\n"
+    "\n"
+    "Now, analyze the state machine and generate diverse request sequences:\n",
+    protocol_name) == -1) {
         FATAL("Failed to construct seeds sequence prompt");
         goto cleanup;
     }
-
-    *final_msg = msg;
+    
+    // Escape the content and wrap in JSON
+    char* escaped_content = json_escape_string(content);
+    if (!escaped_content) {
+        free(content);
+        goto cleanup;
+    }
+    
+    if (asprintf(&msg, "[{\"role\": \"user\", \"content\": \"%s\"}]", escaped_content) == -1) {
+        ck_free(escaped_content);
+        free(content);
+        msg = NULL;
+        goto cleanup;
+    }
+    
+    ck_free(escaped_content);
+    
+    // Only set final_msg after all operations succeed
+    *final_msg = content;
     
     return msg;
 
 cleanup:
-    // Cleanup
+    // Cleanup and ensure final_msg is NULL on error
+    if (final_msg) {
+        *final_msg = NULL;
+    }
     free(msg);
     return NULL;
 }
